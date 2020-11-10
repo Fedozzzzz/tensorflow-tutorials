@@ -45,6 +45,21 @@ def plot_compared_images(images, recons, title):
     plt.show()
 
 
+def get_threshold():
+    errors = []
+    # loop over all original images and their corresponding
+    # reconstructions
+    recons = autoencoder.call(train_images)
+    for (image, recon) in zip(train_images, recons):
+        # compute the mean squared error between the ground-truth image
+        # and the reconstructed image, then add it to our list of errors
+        mse = np.mean((image - recon) ** 2)
+        errors.append(mse)
+
+    # define threshold
+    return np.quantile(errors, 0.99)
+
+
 # MSE anomaly detecting
 def detect_anomalies(images, recons):
     errors = []
@@ -57,7 +72,8 @@ def detect_anomalies(images, recons):
         errors.append(mse)
 
     # define threshold
-    threshold = np.quantile(errors, 0.99)
+    # threshold = np.quantile(errors, 0.99)
+    threshold = get_threshold()
     idxs = np.where(np.array(errors) >= threshold)[0]
     print("[INFO] mse threshold: {}".format(threshold))
     print("[INFO] {} outliers found".format(len(idxs)))
